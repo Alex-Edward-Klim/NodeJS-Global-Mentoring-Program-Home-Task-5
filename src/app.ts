@@ -39,12 +39,16 @@ app.use((req, res, next) => {
 
 process.on('uncaughtException', (error) => {
   logger.error(`captured error: ${error.message}`);
-  const { exit } = process;
-  exit(1);
+  // const { exit } = process;
+  // exit(1);
 });
 
-process.on('unhandledRejection', (reason: Error) => {
-  logger.error(`Unhandled rejection detected: ${reason.message}`);
+process.on('unhandledRejection', (reason) => {
+  if (reason instanceof Error) {
+    logger.error(`Unhandled rejection detected: ${reason.message}`);
+    return;
+  }
+  logger.error(`Unhandled rejection detected: ${reason}`);
 });
 
 app.use('/api/users', usersRoutes);
@@ -72,5 +76,7 @@ app.use(async (err: any, req: Request, res: Response, next: NextFunction) => {
     return res.status(err.status || 500).send(err.message);
   }
 });
+
+// throw new Error('custom err');
 
 export default app;
